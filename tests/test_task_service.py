@@ -2,29 +2,7 @@ import pytest
 from unittest.mock import MagicMock, patch
 from data_manager import DataManager
 from task_service import TaskService, TaskStatus
-
-
-
-sample_tasks = [
-    {
-        "id": 1,
-        "title": "Task 1",
-        "description": "Description 1",
-        "category": "Category 1",
-        "due_date": "2023-12-01",
-        "priority": "высокий",
-        "status": TaskStatus.UNCOMPLETED.value,
-    },
-    {
-        "id": 2,
-        "title": "Task 2",
-        "description": "Description 2",
-        "category": "Category 2",
-        "due_date": "2023-12-02",
-        "priority": "средний",
-        "status": TaskStatus.UNCOMPLETED.value,
-    },
-]
+from test_data import sample_tasks
 
 @pytest.fixture
 def data_manager():
@@ -70,7 +48,7 @@ def test_display_sorted_tasks(task_service, capsys):
     assert captured.out.index("Task 1") < captured.out.index("Task 2")
 
 def test_display_tasks_by_category(task_service, capsys):
-    task_service.display_tasks_by_category("Category 1")
+    task_service.display_tasks_by_category("работа")
     captured = capsys.readouterr()
     assert "Task 1" in captured.out
     assert "Task 2" not in captured.out
