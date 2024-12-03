@@ -69,25 +69,31 @@ def validate_input(
         print(error_message)
 
 def is_valid_sorting_type(value: str) -> bool:
+    """Проверяет, что введен допустимый тип сортировки"""
     return value in SORTING_MAP.keys()
 
 def is_valid_updating_type(value: str) -> bool:
+    """Проверяет, что введено допустимое поле для обновления"""
     return value in UPDATING_MAP.keys()
 
 def is_valid_searching_type(value: str) -> bool:
+    """Проверяет, что введено допустимое поле для поиска"""
     return value in SEARCHING_MAP.keys()
 
 def is_valid_status(value: str) -> bool:
+    """Проверяет. что введен допустимый статус задачи"""
     return value in ['выполнена', 'не выполнена']
 
 def is_valid_category(value: str) -> bool:
+    """Проверяет, что введена допустимая категория"""
     return value in {cat.value for cat in TaskCategory}
 
 def is_not_empty(value: str) -> bool:
-    """Проверяет, что передана не пустая строка"""
+    """Проверяет, что введена не пустая строка"""
     return bool(value and value.strip())
 
 def is_valid_date(value: str) -> bool:
+    """Проверяет валидность даты (не раньше текущего дня)"""
     input_date = datetime.strptime(value, "%Y-%m-%d")
     current_date = datetime.today().date()
     return input_date.date() >= current_date
@@ -102,10 +108,15 @@ def is_valid_priority(value: str) -> bool:
 
 
 class TaskManager:
+    """
+    Класс для взаимодействия с пользователем, получения от него требуемых данных и параметров
+    и передачи их для обработки в объект TaskService.
+    """
     def __init__(self, task_service: TaskService = TaskService()):
         self.task_service = task_service
 
     def display_tasks(self):
+        """Выводит на экран меню доступных вариантов вывода задач"""
         print("\nПросмотр задач: \n")
         display_options = {
             1: "Просмотр всех задачи",
@@ -134,9 +145,14 @@ class TaskManager:
 
 
     def display_all_tasks(self):
+        """Выводит на экран все задачи из базы данных"""
         self.task_service.display_tasks()
 
     def display_sorted_tasks(self):
+        """
+        Запрашивает у пользователя поле для сортировки задач.
+        Выводит на экран все задачи из базы данных, отсортированные по требуемому полю.
+        """
         input_sorting_term = validate_input(
             "Введите параметр сортировки ('приоритет', 'дата окончания', 'категория', 'статус')",
             "Введите корректный тип сортировки - 'приоритет', 'дата окончания', 'категория' или 'статус'",
@@ -150,6 +166,10 @@ class TaskManager:
         self.task_service.display_sorted_tasks(sorting_type)
 
     def display_category_tasks(self):
+        """
+        Запрашивает у пользователя категорию для отображения задач.
+        Выводит на экран все задачи выбранной категории.
+        """
         category = validate_input(
             "Введите нужную категорию ('работа', 'личное', 'учеба', 'здоровье', 'прочее')",
             "Некорректный ввод. Введите одну категорию -"
@@ -163,6 +183,10 @@ class TaskManager:
         self.task_service.display_tasks_by_category(category)
 
     def display_task_by_id(self):
+        """
+        Запрашивает у пользователя ID интересующей задачи.
+        Выводит на экран всю информацию о выбранной задаче.
+        """
         task_id = validate_input(
             "Введите ID задания",
             "ID задания должен быть целым числом",
@@ -176,6 +200,11 @@ class TaskManager:
         return task_id
 
     def add_task(self):
+        """
+        Последовательно запрашивает у пользователя все необходимые поля для создания новой задачи.
+        В случае ввода стоп-слова прерывает и отменяет добавление новой задачи.
+        После ввода всех требуемых полей передает данные в объект TaskService для сохранения новой задачи.
+        """
         task = dict()
 
         fields = [
@@ -199,6 +228,9 @@ class TaskManager:
         self.task_service.add_task(**task)
 
     def modify_task(self):
+        """
+        Выводит на экран меню доступных вариантов изменения задачи.
+        """
         print("\nПросмотр задач: \n")
         display_options = {
             1: "Пометить задачу как выполненную",
@@ -222,10 +254,20 @@ class TaskManager:
             return
 
     def complete_task(self):
+        """
+        Запрашивает у пользователя ID задачи, которую нужно отметить как выполненную,
+        выводит информацию о ней на экран, изменяет статус задачи на 'выполнена'.
+        """
         task_id = self.display_task_by_id()
         self.task_service.complete_task(int(task_id))
 
     def update_task(self):
+        """
+        Запрашивает у пользователя ID задачи, которую нужно отредактировать.
+        Выводит на экран всю информацию о выбранной задаче.
+        Запрашивает у пользователя поле для редактирования задачи и новое значение для этого поля.
+        Передает задачи, поле и новые данные для корректировки в объект TaskService.
+        """
         task_id = self.display_task_by_id()
 
         update_config = {
@@ -290,13 +332,18 @@ class TaskManager:
             self.task_service.update_task(int(task_id), UPDATING_MAP.get(updating_term), new_value)
 
     def remove_task(self):
+        """
+        Запрашивает у пользователя ID задачи для удаления.
+        Передает ID задачи для удаления в TaskService.
+        """
         task_id = input("Введите id задачи: ")
         self.task_service.delete_task(int(task_id))
 
     def search_task(self):
-        ### можно искать по словам в описании или названии
-        ### можно вывести все задачи с нужным нам статусом
-        ### можно вывести все задачи с нужной категорией
+        """
+        Запрашивает у пользователя поле для поиска и значение для поиска в этих полях.
+        Передает поле для поиска и искомое значение в объект TaskService.
+        """
         searching_config = {
             "название и описание": {
                 "prompt": "Введите слово для поиска в названии и описании",
