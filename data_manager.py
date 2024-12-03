@@ -4,10 +4,10 @@ from pathlib import Path
 
 
 class DataManager:
-    def __init__(self, file_path: Path = Path("books.json") ):
+    def __init__(self, file_path: Path = Path("tasks.json") ):
         self.file_path = file_path
 
-    def load_books(self) -> list[dict[str, Any]]:
+    def load_tasks(self) -> list[dict[str, Any]]:
         """Выгружает все данные из файла базы данных."""
         try:
             content = self.file_path.read_text()
@@ -19,6 +19,6 @@ class DataManager:
         except json.JSONDecodeError:
             return []
 
-    def save_books(self, books: list[dict[str, Any]]) -> None:
+    def save_tasks(self, tasks: list[dict[str, Any]]) -> None:
         """Сохраняет полученные данные в файл базы данных."""
-        self.file_path.write_text(json.dumps(books, indent=4, ensure_ascii=False))
+        self.file_path.write_text(json.dumps(tasks, indent=4, ensure_ascii=False))
